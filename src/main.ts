@@ -1,4 +1,3 @@
-import './style.css'
 import * as THREE from 'three';
 import addControls from './controls/addControls';
 import addBox from './models/box';
@@ -22,10 +21,7 @@ const { scene, camera, renderer } = init();
 addControls(camera, renderer);
 
 const loopTime = 10;
-const mapX = 1;
 const mapY = 50;
-
-const chanceOfSkip = 0;
 
 const getHeightsArray = (mapY) => {
     const heights = [];
@@ -39,31 +35,25 @@ const heights = getHeightsArray(mapY);
 
 const cubes = [];
 
-for (let i = 0; i < mapX; i++) {
-    for (let j = 0; j < mapY; j++) {
-        const skip = Math.random() < chanceOfSkip;
-        if (skip) continue
+for (let j = 0; j < mapY; j++) {
+    const randomHeight = heights.splice(Math.floor(Math.random() * heights.length), 1)[0];
 
-        const randomHeight = heights.splice(Math.floor(Math.random() * heights.length), 1)[0];
+    const dimensions = [ 1, randomHeight, 1 ];
 
-        const dimensions = [ 1, randomHeight, 1 ];
-
-        const options = {
-            edges: false,
-            cubeColor: '#ffffff'
-        }
-
-        const { cube } = addBox(scene, dimensions, options);
-        cube.position.set(i, randomHeight / 2, j - mapY / 2);
-        cubes.push(cube);
+    const options = {
+        edges: false,
+        cubeColor: '#ffffff'
     }
+
+    const { cube } = addBox(scene, dimensions, options);
+    cube.position.set(0, randomHeight / 2, j - mapY / 2);
+    cubes.push(cube);
 }
 
 const switchCubes = (i1, i2) => {
     const cube1 = cubes[i1];
     const cube2 = cubes[i2];
 
-    // set cubes color to red
     cube1.material.color.setHex(0x00ff00);
     cube2.material.color.setHex(0xff0000);
 
@@ -76,7 +66,6 @@ const switchCubes = (i1, i2) => {
     cubes[i1] = cube2;
     cubes[i2] = cube1;
 
-    // set cubes color back to white
     setTimeout(() => {
         cube1.material.color.setHex(0xffffff);
         cube2.material.color.setHex(0xffffff);
@@ -126,9 +115,9 @@ const mainLoop = async () => {
         await sleep(loopTime);
     
         const sorted = sortCubesStep();
+        
         if (sorted) {
             finishedSorting();
-            // set cubes color to white
             await sleep(1500);
             
             cubes.forEach(cube => {
@@ -141,10 +130,12 @@ const mainLoop = async () => {
         }
     }
 }
+
 mainLoop();
 
 function animate() {
     renderer.render( scene, camera );
     requestAnimationFrame( animate );
 }
+
 animate();
